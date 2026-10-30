@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCT | OSINT CBRN Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <header class="top-bar">
+        <div class="logo-group">
+            <div class="radar-icon"></div>
+            <div>
+                <div class="brand-title">OCT<span>24</span></div>
+                <div class="brand-sub">OSINT CBRN TRACKER</div>
+            </div>
+        </div>
+
+        <div class="utc-clock" id="utc-clock">00:00 UTC</div>
+
+        <div class="search-box">
+            <input type="text" placeholder="Find coordinates, cities or monitored zones...">
+        </div>
+    </header>
+
+    <aside class="left-widgets">
+        
+        <div class="fr-card">
+            <div class="fr-card-header">
+                <span>Surface & Thermal Triggers</span>
+                <span class="live-badge">LIVE</span>
+            </div>
+            <div class="fr-card-body" id="triggers-list">
+                <div class="trigger-item" onclick="simulatePlume(32.65, 51.67, 'Isfahan Sector', 3.4, 0, 75, 28)">
+                    <div class="trigger-main">
+                        <span class="rank">1.</span>
+                        <span class="code-tag">IR-ISF</span>
+                        <span class="alert-tag">DEPTH 0km</span>
+                    </div>
+                    <div class="trigger-count">M 3.4 ⚠️</div>
+                    <div class="trigger-sub">Isfahan Province — Click to test plume</div>
+                </div>
+
+                <div class="trigger-item" onclick="simulatePlume(35.68, 51.38, 'Tehran Sector', 3.1, 1.2, 110, 22)">
+                    <div class="trigger-main">
+                        <span class="rank">2.</span>
+                        <span class="code-tag">IR-THR</span>
+                        <span class="type-tag">THERMAL</span>
+                    </div>
+                    <div class="trigger-count">M 3.1 🔥</div>
+                    <div class="trigger-sub">Tehran Sector — Click to test plume</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fr-card">
+            <div class="fr-card-header">
+                <span>Monitored Sectors Wind</span>
+                <span class="live-badge">LIVE</span>
+            </div>
+            <div class="fr-card-body">
+                <div class="sector-row">
+                    <div class="sector-info">
+                        <strong>Tehran <span class="code">THR</span></strong>
+                        <span class="weather-meta">🌡️ 18°C &nbsp; ← 110° 22 km/h</span>
+                    </div>
+                    <div class="status-indicators">
+                        <span class="dot green"></span> 0.0
+                    </div>
+                </div>
+
+                <div class="sector-row">
+                    <div class="sector-info">
+                        <strong>Isfahan <span class="code">IFN</span></strong>
+                        <span class="weather-meta">🌡️ 21°C &nbsp; ↙ 75° 28 km/h</span>
+                    </div>
+                    <div class="status-indicators">
+                        <span class="dot green"></span> 0.0
+                    </div>
+                </div>
+
+                <div class="sector-row">
+                    <div class="sector-info">
+                        <strong>Bushehr <span class="code">BUZ</span></strong>
+                        <span class="weather-meta">🌡️ 27°C &nbsp; ↖ 140° 32 km/h</span>
+                    </div>
+                    <div class="status-indicators">
+                        <span class="dot green"></span> 0.0
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fr-card" id="telemetry-card" style="display: none;">
+            <div class="fr-card-header">
+                <span id="telemetry-title">Plume Dispersion Model</span>
+                <span class="danger-badge">ALERT</span>
+            </div>
+            <div class="fr-card-body">
+                <p id="telemetry-desc" class="telemetry-text"></p>
+                <button class="reset-btn" onclick="resetSimulation()">Clear Simulation</button>
+            </div>
+        </div>
+
+    </aside>
+
+    <div class="right-controls">
+        <button class="ctrl-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
+        <button class="ctrl-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
+        <button class="ctrl-btn" onclick="resetMapView()" title="Center Iran">⌖</button>
+    </div>
+
+    <nav class="bottom-dock">
+        <button class="dock-item active">
+            <span class="dock-icon">📡</span>
+            <span class="dock-label">Seismic</span>
+        </button>
+        <button class="dock-item">
+            <span class="dock-icon">🔥</span>
+            <span class="dock-label">Thermal</span>
+        </button>
+        <button class="dock-item">
+            <span class="dock-icon">💨</span>
+            <span class="dock-label">Wind Plume</span>
+        </button>
+        <button class="dock-item">
+            <span class="dock-icon">🧪</span>
+            <span class="dock-label">Sentinel-5P</span>
+        </button>
+        <button class="dock-item" onclick="simulatePlume(32.65, 51.67, 'Test Simulation', 3.8, 0, 65, 35)">
+            <span class="dock-icon">⚡</span>
+            <span class="dock-label">Test Alert</span>
+        </button>
+    </nav>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
