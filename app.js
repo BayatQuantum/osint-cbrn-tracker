@@ -8,7 +8,7 @@ const CONF_COLOR = { LOW: '#f5a623', MEDIUM: '#ea580c', HIGH: '#dc2626' };
 
 const map = L.map('map', { center: CENTER, zoom: 6, minZoom: 3, zoomControl: false,
   maxBounds: [[0, 20], [58, 95]], maxBoundsViscosity: 0.8 });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 }).addTo(map);
 
 const layers = { region: L.layerGroup().addTo(map), fast: L.layerGroup().addTo(map),
@@ -187,3 +187,17 @@ async function loadAll() {
 }
 loadAll();
 setInterval(loadAll, REFRESH_MS);
+
+// ---- UI additions: collapsible cards, fullscreen, region info ----
+document.querySelectorAll('.chev').forEach(b => {
+  b.onclick = () => b.closest('.card').classList.toggle('collapsed');
+});
+$('zfull').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+
+const _drawRegion = drawRegion;
+drawRegion = function (b) {
+  _drawRegion(b);
+  const box = $('region-info'); box.textContent = '';
+  box.append(kv('South / North', `${b.south} / ${b.north}`), kv('West / East', `${b.west} / ${b.east}`),
+             kv('Page refresh', 'every 60 s'), kv('Analysis feed', 'GitHub Actions, 5-20 min'));
+};
