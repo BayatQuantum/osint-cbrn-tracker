@@ -1,0 +1,15 @@
+# OCT - Configuration
+# bbox uses named keys on purpose (no ordering mistakes).
+region_name: "Middle East"
+
+bbox:
+  south: 25.0
+  west: 44.0
+  north: 40.0
+  east: 64.0
+
+min_magnitude: 2.0
+max_depth_km: 2.5
+
+# USGS feed: all earthquakes of the past hour, worldwide
+usgs_feed_url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"

@@ -1,0 +1,5 @@
+.venv/
+alert.json
+config.backup.yaml
+__pycache__/
+*.pyc
