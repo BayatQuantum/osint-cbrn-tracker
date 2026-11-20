@@ -6,9 +6,9 @@ const CENTER = [32.4279, 53.688];
 const DEFAULT_CFG = { bbox: { south: 25, west: 44, north: 40, east: 64 }, min_magnitude: 2.0, max_depth_km: 2.5 };
 const CONF_COLOR = { LOW: '#f5a623', MEDIUM: '#ea580c', HIGH: '#dc2626' };
 
-const map = L.map('map', { center: CENTER, zoom: 6, minZoom: 3, zoomControl: false,
+const map = L.map('map', { center: CENTER, zoom: 6, minZoom: 3, zoomControl: false, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false,
   maxBounds: [[0, 20], [58, 95]], maxBoundsViscosity: 0.8 });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 }).addTo(map);
 
 const layers = { region: L.layerGroup().addTo(map), fast: L.layerGroup().addTo(map),
@@ -33,11 +33,11 @@ tickClocks();
 
 $('zin').onclick = () => map.zoomIn();
 $('zout').onclick = () => map.zoomOut();
-$('zhome').onclick = () => map.flyTo(CENTER, 6, { duration: 1 });
+$('zhome').onclick = () => map.setView(CENTER, 6, { animate: false });
 $('search-form').onsubmit = e => {
   e.preventDefault();
   const m = $('search').value.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
-  if (m && Math.abs(+m[1]) <= 90 && Math.abs(+m[2]) <= 180) map.flyTo([+m[1], +m[2]], 9, { duration: 1 });
+  if (m && Math.abs(+m[1]) <= 90 && Math.abs(+m[2]) <= 180) map.setView([+m[1], +m[2]], 9, { animate: false });
 };
 document.querySelectorAll('.dock-btn[data-layer]').forEach(b => {
   b.onclick = () => {
@@ -65,7 +65,7 @@ function section(title) { const s = h('div', 'sec'); s.append(h('h4', '', title)
 
 function showDetail(ev) {
   $('detail-card').hidden = false;
-  $('detail-title').textContent = (ev.demo ? 'DEMO: ' : '') + `M${ev.magnitude} surface event`;
+  $('detail-title').textContent = (ev.demo ? 'SIMULATION: ' : '') + `M${ev.magnitude} surface event`;
   const body = $('detail-body'); body.textContent = '';
   const color = CONF_COLOR[ev.confidence] || CONF_COLOR.LOW;
 
@@ -100,7 +100,7 @@ function showDetail(ev) {
         { color, weight: 1, fillColor: color, fillOpacity: 0.12 + 0.08 * i }).addTo(layers.plume);
     });
   }
-  map.flyTo([ev.lat, ev.lon], 8, { duration: 1 });
+  map.setView([ev.lat, ev.lon], 8, { animate: false });
 }
 $('detail-close').onclick = () => { $('detail-card').hidden = true; layers.plume.clearLayers(); };
 
@@ -118,7 +118,7 @@ function renderEvents(events) {
     const main = h('div', 'row-main');
     main.append(h('div', 'row-title', `${ev.event_type}, depth ${ev.depth_km} km`),
                 h('div', 'row-sub', `${ev.lat.toFixed(2)}, ${ev.lon.toFixed(2)} | ${ev.time.slice(11, 16)} UTC`));
-    row.append(mag, main, h('span', ev.demo ? 'tag demo' : 'tag', ev.demo ? 'DEMO' : ev.confidence));
+    row.append(mag, main, h('span', ev.demo ? 'tag demo' : 'tag', ev.demo ? 'SIMULATED' : ev.confidence));
     row.onclick = () => showDetail(ev);
     list.append(row);
   });
@@ -132,7 +132,7 @@ function setStatus(text, level) {
 function drawRegion(b) {
   layers.region.clearLayers();
   L.rectangle([[b.south, b.west], [b.north, b.east]],
-    { color: '#f5a623', weight: 1.5, dashArray: '6 6', fill: false, interactive: false }).addTo(layers.region);
+    { color: '#4a90c2', weight: 1.5, dashArray: '6 6', fill: false, interactive: false }).addTo(layers.region);
 }
 
 function renderFast(features, cfg, skip) {
@@ -148,16 +148,16 @@ function renderFast(features, cfg, skip) {
 }
 
 let demoOn = false;
-const DEMO_EVENT = { id: 'demo', demo: true, source: 'DEMO', lat: 32.65, lon: 51.67, magnitude: 2.8, depth_km: 0,
+const DEMO_EVENT = { id: 'demo', demo: true, source: 'SIMULATED', lat: 32.65, lon: 51.67, magnitude: 2.8, depth_km: 0,
   event_type: 'explosion', confidence: 'HIGH', time: new Date().toISOString().slice(0, 19) + 'Z',
-  thermal: { checked: true, anomaly: true, source: 'DEMO' },
+  thermal: { checked: true, anomaly: true, source: 'SIMULATED' },
   wind: { speed_kmh: 28, from_deg: 255, toward_deg: 75, precip: false },
   plume: { hours: [1, 3, 6] }, gas_analysis: { status: 'PENDING' } };
 
 $('demo-btn').onclick = () => {
   demoOn = !demoOn;
   $('demo-btn').classList.toggle('on', demoOn);
-  if (demoOn) { renderEvents([DEMO_EVENT]); showDetail(DEMO_EVENT); setStatus('Demo mode (simulated data)', 'amber'); }
+  if (demoOn) { renderEvents([DEMO_EVENT]); showDetail(DEMO_EVENT); setStatus('Simulation mode - synthetic data', 'amber'); }
   else { $('detail-card').hidden = true; layers.plume.clearLayers(); loadAll(); }
 };
 
@@ -173,7 +173,7 @@ async function loadAll() {
       renderEvents(a.events);
       const age = Math.round((Date.now() - new Date(a.generated_at)) / 60000);
       if (age > STALE_MIN) setStatus(`Analysis feed stale (${age} min)`, 'red');
-      else setStatus(`${a.status} | updated ${age} min ago`, a.status === 'NORMAL' ? 'green' : 'amber');
+      else setStatus(`Status: ${a.status} | updated ${age} min ago`, a.status === 'NORMAL' ? 'green' : 'amber');
     }
   } catch (e) {
     drawRegion(cfg.bbox);
