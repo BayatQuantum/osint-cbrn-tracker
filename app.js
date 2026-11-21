@@ -1,5 +1,5 @@
 const RAW_URL = 'https://raw.githubusercontent.com/BayatQuantum/osint-cbrn-tracker/data/alert.json';
-const USGS_URL = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson';
+const USGS_URL = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
 const STALE_MIN = 45;
 const REFRESH_MS = 60000;
 const CENTER = [32.4279, 53.688];
@@ -74,7 +74,8 @@ function showDetail(ev) {
   s1.append(big, kv('Depth', `${ev.depth_km} km`), kv('Type', ev.event_type),
             kv('Time (UTC)', ev.time.replace('T', ' ').replace('Z', '')),
             kv('Position', `${ev.lat.toFixed(3)}, ${ev.lon.toFixed(3)}`),
-            kv('Source', ev.source), kv('Confidence', ev.confidence));
+            kv('Source', ev.source), kv('Confidence', ev.confidence),
+            kv('Flags', (ev.flags && ev.flags.length) ? ev.flags.join(', ') : 'none'));
   const s2 = section('Thermal check');
   const t = ev.thermal;
   s2.append(kv('Status', !t || !t.checked ? 'Not checked yet' : (t.anomaly ? 'Anomaly detected' : 'No anomaly')));

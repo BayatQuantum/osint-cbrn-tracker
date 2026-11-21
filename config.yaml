@@ -11,5 +11,5 @@ bbox:
 min_magnitude: 2.0
 max_depth_km: 2.5
 
-# USGS feed: all earthquakes of the past hour, worldwide
-usgs_feed_url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"
+# USGS feed: all earthquakes of the past 24 hours, worldwide
+usgs_feed_url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"

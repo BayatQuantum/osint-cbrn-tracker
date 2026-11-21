@@ -2,6 +2,7 @@
 """OCT tracker v1: USGS feed -> filter -> alert.json (schema_version 1)."""
 
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,9 +50,25 @@ def iso(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def classify(props: dict):
+    """Return (confidence, flags) from the USGS event type and review status.
+    HIGH is reserved for events confirmed by a thermal anomaly (not implemented yet)."""
+    t = (props.get("type") or "").lower()
+    conf, flags = "LOW", []
+    if "quarry" in t or "mining" in t:
+        flags.append("likely_mining")
+    elif "explosion" in t:
+        conf = "MEDIUM"
+        flags.append("labeled_explosion")
+    if props.get("status") == "automatic":
+        flags.append("unreviewed")
+    return conf, flags
+
+
 def build_event(feat: dict) -> dict:
     lon, lat, depth = feat["geometry"]["coordinates"]
     p = feat["properties"]
+    conf, flags = classify(p)
     return {
         "id": feat["id"],
         "source": "USGS",
@@ -61,8 +78,8 @@ def build_event(feat: dict) -> dict:
         "magnitude": p["mag"],
         "depth_km": depth,
         "event_type": p.get("type") or "unknown",
-        "confidence": "LOW",
-        "flags": [],
+        "confidence": conf,
+        "flags": flags,
         "thermal": {"checked": False, "source": None, "anomaly": None, "checked_at": None},
         "wind": None,
         "plume": None,
@@ -87,12 +104,15 @@ def main() -> None:
         if not in_bbox(lat, lon, cfg["bbox"]):
             continue
         ev = build_event(f)
-        ev["wind"] = safe_wind(lat, lon)
+        ev["wind"] = None if os.environ.get("OCT_SKIP_WIND") else safe_wind(lat, lon)
         if ev["wind"]:
             ev["plume"] = {"hours": [1, 3, 6], "model": "simple_cone_v1"}
         events.append(ev)
 
-    status = "WATCH" if events else "NORMAL"
+    events.sort(key=lambda e: e["time"], reverse=True)
+    rank = {"LOW": 1, "MEDIUM": 2, "HIGH": 3}
+    top = max((rank[e["confidence"]] for e in events if "likely_mining" not in e["flags"]), default=0)
+    status = "CONFIRMED" if top >= 3 else "WATCH" if top >= 1 else "NORMAL"
     alert = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
