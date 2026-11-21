@@ -8,12 +8,8 @@ const CONF_COLOR = { LOW: '#f5a623', MEDIUM: '#ea580c', HIGH: '#dc2626' };
 
 const map = L.map('map', { center: CENTER, zoom: 6, minZoom: 3, zoomControl: false, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false,
   maxBounds: [[0, 20], [58, 95]], maxBoundsViscosity: 0.8 });
-const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
-L.tileLayer(ESRI + 'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ', maxNativeZoom: 16, maxZoom: 18 }).addTo(map);
-L.tileLayer(ESRI + 'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-  maxNativeZoom: 16, maxZoom: 18, pane: 'shadowPane' }).addTo(map);
-
+L.tileLayer('https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png?key=cb1_5djr_1_26a1cec555fe8b95121ad3b7', {
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 18 }).addTo(map);
 const layers = { region: L.layerGroup().addTo(map), fast: L.layerGroup().addTo(map),
                  events: L.layerGroup().addTo(map), plume: L.layerGroup().addTo(map) };
 
