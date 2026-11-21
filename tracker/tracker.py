@@ -8,6 +8,7 @@ from pathlib import Path
 
 import requests
 import yaml
+from wind import safe_wind
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = ROOT / "config.yaml"
@@ -85,7 +86,11 @@ def main() -> None:
             continue
         if not in_bbox(lat, lon, cfg["bbox"]):
             continue
-        events.append(build_event(f))
+        ev = build_event(f)
+        ev["wind"] = safe_wind(lat, lon)
+        if ev["wind"]:
+            ev["plume"] = {"hours": [1, 3, 6], "model": "simple_cone_v1"}
+        events.append(ev)
 
     status = "WATCH" if events else "NORMAL"
     alert = {
