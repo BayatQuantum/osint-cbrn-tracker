@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-28T10:52:28Z",
+  "status": "NORMAL",
+  "config": {
+    "region_name": "Middle East",
+    "bbox": {
+      "south": 25.0,
+      "west": 44.0,
+      "north": 40.0,
+      "east": 64.0
+    },
+    "min_magnitude": 2.0,
+    "max_depth_km": 2.5
+  },
+  "events": []
+}
